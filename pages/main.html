@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>홈 - TES Speaking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png">
+    <link rel="apple-touch-icon" href="../favicon.png">
+    <link rel="manifest" href="../manifest.json">
+    <style>
+        .home-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--sp-5) var(--sp-5) var(--sp-3);
+        }
+
+        .home-greeting {
+            font-size: var(--text-sm);
+            color: var(--text-gray);
+            font-weight: 400;
+        }
+
+        .home-name {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-top: 2px;
+        }
+
+        .home-avatar {
+            width: 44px;
+            height: 44px;
+            background: var(--primary-pale);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            font-size: var(--text-xl);
+            border: 2px solid var(--primary-light);
+        }
+
+        /* Menu Section */
+        .menu-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--sp-3);
+        }
+
+        .menu-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-4) var(--sp-3);
+            text-align: center;
+            box-shadow: var(--shadow-xs);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--sp-2);
+        }
+
+        .menu-card:active {
+            transform: scale(0.96);
+            background: var(--bg-light);
+        }
+
+        .menu-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-2xl);
+        }
+
+        .menu-card-icon.teal  { background: var(--primary-pale);        color: var(--primary-dark); }
+        .menu-card-icon.orange { background: var(--accent-orange-pale);  color: var(--accent-orange); }
+        .menu-card-icon.yellow { background: var(--accent-yellow-pale);  color: #B45309; }
+
+        .menu-card-label {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .menu-card-sub {
+            font-size: var(--text-xs);
+            color: var(--text-gray);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="page-content" style="padding-top: 0;">
+
+            <!-- Header -->
+            <div class="home-header">
+                <div>
+                    <p class="home-greeting">안녕하세요 👋</p>
+                    <h1 class="home-name" id="studentName">학생</h1>
+                </div>
+                <a href="profile.html" class="home-avatar">
+                    <i class="ti ti-user"></i>
+                </a>
+            </div>
+
+            <!-- Stats Banner -->
+            <div class="stats-banner" style="margin-bottom: var(--sp-4);">
+                <div>
+                    <div class="stats-banner-value" id="learnedCount">0</div>
+                    <div class="stats-banner-label">오늘 완료한 학습</div>
+                </div>
+                <div class="stats-banner-right">
+                    <div class="stats-banner-goal">오늘의 목표</div>
+                    <div class="stats-banner-progress">
+                        <span id="todayCompleted">0</span> / 5 유닛
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Start -->
+            <div class="quick-start" onclick="location.href='class.html'" style="margin-bottom: var(--sp-5);">
+                <div class="quick-start-icon">
+                    <i class="ti ti-player-play"></i>
+                </div>
+                <div class="quick-start-body">
+                    <div class="quick-start-title">학습 계속하기</div>
+                    <div class="quick-start-desc" id="lastLearningDesc">마지막 학습: -</div>
+                </div>
+                <div class="quick-start-arrow">
+                    <i class="ti ti-chevron-right"></i>
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <p class="section-title">메뉴</p>
+            <div class="menu-row">
+                <a href="class.html" class="menu-card">
+                    <div class="menu-card-icon teal">
+                        <i class="ti ti-books"></i>
+                    </div>
+                    <div class="menu-card-label">클래스</div>
+                    <div class="menu-card-sub">교과서 선택</div>
+                </a>
+                <a href="stats.html" class="menu-card">
+                    <div class="menu-card-icon orange">
+                        <i class="ti ti-chart-bar"></i>
+                    </div>
+                    <div class="menu-card-label">통계</div>
+                    <div class="menu-card-sub">성취도 확인</div>
+                </a>
+                <a href="recordings.html" class="menu-card">
+                    <div class="menu-card-icon yellow">
+                        <i class="ti ti-video"></i>
+                    </div>
+                    <div class="menu-card-label">녹화</div>
+                    <div class="menu-card-sub">저장된 영상</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="main.html" class="nav-item active">
+                <span class="nav-icon"><i class="ti ti-home"></i></span>
+                <span>홈</span>
+            </a>
+            <a href="class.html" class="nav-item">
+                <span class="nav-icon"><i class="ti ti-books"></i></span>
+                <span>클래스</span>
+            </a>
+            <a href="stats.html" class="nav-item">
+                <span class="nav-icon"><i class="ti ti-chart-bar"></i></span>
+                <span>통계</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <span class="nav-icon"><i class="ti ti-user"></i></span>
+                <span>프로필</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="../js/supabase.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const student = JSON.parse(sessionStorage.getItem('currentStudent'));
+            if (!student) {
+                window.location.href = '../index.html';
+                return;
+            }
+            document.getElementById('studentName').textContent = student.name + '님';
+
+            const today = new Date().toISOString().split('T')[0];
+            const completionKey = `completion_${student.name}_${today}`;
+            const todayData = JSON.parse(localStorage.getItem(completionKey) || 'null');
+            const completed = todayData ? todayData.sessions : 0;
+            document.getElementById('learnedCount').textContent = completed;
+            document.getElementById('todayCompleted').textContent = completed;
+
+            loadLastLearning(student);
+        });
+
+        function loadLastLearning(student) {
+            const lastLearning = JSON.parse(localStorage.getItem('lastLearning_' + student.name) || 'null');
+            const descEl = document.getElementById('lastLearningDesc');
+            if (lastLearning && lastLearning.unitTitle) {
+                descEl.textContent = `마지막: ${lastLearning.unitTitle}`;
+            } else {
+                descEl.textContent = '아직 학습 기록이 없어요';
+            }
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../service-worker.js')
+                    .then(() => {}).catch(() => {});
+            });
+        }
+    </script>
+</body>
+
+</html>

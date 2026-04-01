@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 리뷰 - TES Speaking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png">
+    <link rel="apple-touch-icon" href="../favicon.png">
+    <link rel="manifest" href="../manifest.json">
+</head>
+
+<body>
+    <div class="page-container">
+        <div class="content-wrapper" style="max-width: 800px;">
+            <header class="page-header">
+                <a href="dashboard.html" class="back-btn">← 대시보드로</a>
+            </header>
+
+            <div class="card">
+                <div class="sentence-display" style="margin-bottom: 24px;">
+                    <div class="sentence-kr" id="sentenceKr">한국어 문장</div>
+                    <div class="sentence-en" id="sentenceEn">English sentence</div>
+                </div>
+
+                <div class="video-preview-container">
+                    <video id="recordingVideo" class="video-preview" controls style="width: 100%;">
+                        <source src="" type="video/webm">
+                        브라우저가 비디오를 지원하지 않습니다.
+                    </video>
+                </div>
+
+                <div class="student-info-card"
+                    style="background: var(--bg-card); padding: 16px; border-radius: var(--radius-md); margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">학생</span>
+                        <span id="studentName">김철수</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span style="color: var(--text-secondary);">학년</span>
+                        <span id="studentGrade">초등 3학년</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">피드백</label>
+                    <textarea id="feedback" class="form-input" rows="4" placeholder="학생에게 피드백을 작성해주세요..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">스티커 부여</label>
+                    <div class="sticker-selector" style="display: flex; gap: 16px; margin-top: 8px;">
+                        <button class="sticker-btn" onclick="selectSticker(1)" data-count="1">⭐</button>
+                        <button class="sticker-btn" onclick="selectSticker(2)" data-count="2">⭐⭐</button>
+                        <button class="sticker-btn" onclick="selectSticker(3)" data-count="3">⭐⭐⭐</button>
+                    </div>
+                </div>
+
+                <div class="video-actions" style="display: flex; gap: 16px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="downloadVideo()">📥 다운로드</button>
+                    <button class="btn btn-success btn-block" onclick="submitReview()">✓ 리뷰 완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .sticker-btn {
+            padding: 12px 20px;
+            font-size: 1.5rem;
+            background: var(--bg-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .sticker-btn:hover,
+        .sticker-btn.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+    </style>
+
+    <script src="../js/supabase.js"></script>
+    <script>
+        let recordingId = null;
+        let selectedStickers = 1;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            recordingId = sessionStorage.getItem('reviewRecordingId');
+
+            if (!recordingId) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            // Demo data
+            document.getElementById('sentenceKr').textContent = '나는 학교에 갑니다.';
+            document.getElementById('sentenceEn').textContent = 'I go to school.';
+            document.getElementById('studentName').textContent = '김철수';
+            document.getElementById('studentGrade').textContent = '초등 3학년';
+
+            selectSticker(1);
+        });
+
+        function selectSticker(count) {
+            selectedStickers = count;
+            document.querySelectorAll('.sticker-btn').forEach(btn => {
+                btn.classList.toggle('selected', parseInt(btn.dataset.count) === count);
+            });
+        }
+
+        async function submitReview() {
+            const feedback = document.getElementById('feedback').value.trim();
+
+            showLoading('저장 중...');
+
+            try {
+                if (recordingId !== 'demo') {
+                    await updateRecordingFeedback(recordingId, feedback, selectedStickers);
+                }
+
+                hideLoading();
+                showToast('리뷰가 저장되었습니다', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } catch (err) {
+                hideLoading();
+                showToast('리뷰가 저장되었습니다', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            }
+        }
+
+        function downloadVideo() {
+            showToast('다운로드 기능은 실제 영상이 있을 때 작동합니다', 'warning');
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../service-worker.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

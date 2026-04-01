@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생 학습 현황 - TES Speaking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 24px 16px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .stat-card .number span {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .student-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-pale);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+        .student-meta {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+
+        .student-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .recording-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .recording-badge.has-recording {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .recording-badge.no-recording {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .last-activity {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-gray);
+        }
+
+        .academy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary), #6D28D9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 10px;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .logout-btn:hover {
+            background: #FEE2E2;
+            color: #DC2626;
+            border-color: #FECACA;
+        }
+
+        .filter-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: var(--bg-light);
+            padding: 6px;
+            border-radius: var(--radius-lg);
+        }
+
+        .filter-tab {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: transparent;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: var(--bg-white);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png">
+    <link rel="apple-touch-icon" href="../favicon.png">
+    <link rel="manifest" href="../manifest.json">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div>
+                <h1 class="header-title">학생 학습 현황</h1>
+                <span class="academy-badge" id="academyBadge" style="display:none;">
+                    <i class="ti ti-building"></i>
+                    <span id="academyName"></span>
+                </span>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="refreshData()"><i class="ti ti-refresh"></i></button>
+                <a href="mypage.html" class="logout-btn" style="text-decoration:none;">
+                    <i class="ti ti-user-circle"></i> 마이페이지
+                </a>
+            </div>
+        </header>
+
+        <div class="content-area" style="padding-bottom: 20px;">
+            <!-- Quick Menu (moved to top) -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                <a href="students.html" style="text-decoration: none;">
+                    <div
+                        style="background: var(--bg-white); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <i class="ti ti-users" style="font-size: 1.5rem; color: var(--primary);"></i>
+                        <p style="margin: 8px 0 0; font-size: 0.8rem; color: var(--text-dark);">학생 관리</p>
+                    </div>
+                </a>
+                <a href="textbooks.html" style="text-decoration: none;">
+                    <div
+                        style="background: var(--bg-white); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <i class="ti ti-book" style="font-size: 1.5rem; color: #10B981;"></i>
+                        <p style="margin: 8px 0 0; font-size: 0.8rem; color: var(--text-dark);">교재 관리</p>
+                    </div>
+                </a>
+                <a href="classes.html" style="text-decoration: none;">
+                    <div
+                        style="background: var(--bg-white); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm);">
+                        <i class="ti ti-school" style="font-size: 1.5rem; color: #8B5CF6;"></i>
+                        <p style="margin: 8px 0 0; font-size: 0.8rem; color: var(--text-dark);">학습반</p>
+                    </div>
+                </a>
+                <a href="recovery.html" style="text-decoration: none;">
+                    <div
+                        style="background: var(--bg-white); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid #FED7AA;">
+                        <i class="ti ti-arrows-transfer-down" style="font-size: 1.5rem; color: #EA580C;"></i>
+                        <p style="margin: 8px 0 0; font-size: 0.8rem; color: var(--text-dark);">녹화 복구</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Stats (moved below menu) -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="label">총 등록 학생</div>
+                    <div class="number" id="totalStudents">0<span>명</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" style="color: #4F46E5; font-weight: 600;">총 시험 건수</div>
+                    <div class="number" id="totalTests" style="color: #4F46E5;">0<span>건</span></div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="date" onclick="setFilter('date')">
+                    <i class="ti ti-calendar-event"></i> 날짜별 보기
+                </button>
+                <button class="filter-tab" data-filter="all" onclick="setFilter('all')">
+                    <i class="ti ti-users"></i> 전체 학생 보기
+                </button>
+            </div>
+            
+            <!-- Date Picker (visible in date view) -->
+            <div id="datePickerContainer" style="margin-bottom: 16px;">
+                <input type="date" id="datePicker" class="form-input" onchange="renderStudents()" 
+                    style="padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; font-family: inherit; color: var(--text-dark); background-color: var(--bg-white);">
+            </div>
+
+            <!-- Search (visible in all view) -->
+            <div class="search-box" id="searchBoxContainer" style="position: relative; display: none;">
+                <i class="ti ti-search" style="position: absolute; left: 16px; top: 16px; color: var(--text-light); font-size: 1.2rem;"></i>
+                <input type="text" id="searchInput" placeholder="학생 이름 검색..." oninput="filterStudents()" style="padding-left: 44px; width: 100%;">
+            </div>
+
+            <!-- Student List -->
+            <div class="student-list" id="studentList">
+                <div class="empty-state">
+                    <i class="ti ti-loader" style="font-size: 2rem; animation: spin 1s linear infinite;"></i>
+                    <p>학생 정보 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/supabase.js"></script>
+    <script>
+        let allStudents = [];
+        let studentRecordings = {};
+        let currentFilter = 'date';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Auth guard: check teacher session
+            const { data: session } = await getTeacherSession();
+            // console.log('🔍 Dashboard Auth Check:', session); // Debug
+
+            if (!session || !session.user) {
+                console.log('❌ No session, redirecting to login');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Academy context check
+            const academy = getCurrentAcademy();
+            if (!academy) {
+                window.location.href = 'academy-setup.html';
+                return;
+            }
+
+            // Show academy badge
+            document.getElementById('academyName').textContent = academy.name;
+            document.getElementById('academyBadge').style.display = 'inline-flex';
+
+            await loadDashboardData();
+        });
+
+        async function handleLogout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                await teacherLogout();
+                sessionStorage.removeItem('currentAcademy');
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                console.log('📊 Loading dashboard data...');
+
+                const client = await getSupabase();
+                console.log('📊 Supabase client:', client ? 'OK' : 'FAILED');
+
+                if (!client) {
+                    document.getElementById('studentList').innerHTML = `
+                        <div class="empty-state">
+                            <p>데이터베이스 연결 실패</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get students (filtered by academy via getStudents)
+                const { data: students, error } = await getStudents();
+
+                console.log('📊 Students query result:', { students, error });
+
+                if (error) {
+                    console.error('📊 Students query error:', error);
+                    throw error;
+                }
+
+                allStudents = (students || []).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+                console.log('📊 Total students:', allStudents.length);
+
+                // Get recordings for each student
+                for (const student of allStudents) {
+                    const { data: files, error: filesError } = await client
+                        .storage
+                        .from('recordings')
+                        .list(student.id, { limit: 100 });
+
+                    console.log(`📊 Recordings for ${student.name}:`, files?.length || 0);
+
+                    const recordings = (files || []).filter(f => f.name.endsWith('.webm'));
+                    studentRecordings[student.id] = recordings;
+                }
+
+                updateStats();
+                renderStudents();
+
+            } catch (e) {
+                console.error('📊 Dashboard load error:', e);
+                document.getElementById('studentList').innerHTML = `
+                    <div class="empty-state">
+                        <p>데이터를 불러오는데 실패했습니다</p>
+                        <p style="font-size: 0.8rem; color: var(--text-light);">${e.message || e}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats() {
+            const total = allStudents.length;
+            let testCount = 0;
+            for (const studentId in studentRecordings) {
+                testCount += (studentRecordings[studentId] || []).length;
+            }
+
+            document.getElementById('totalStudents').innerHTML = total + '<span>명</span>';
+            const totalTestsEl = document.getElementById('totalTests');
+            if(totalTestsEl) totalTestsEl.innerHTML = testCount + '<span>건</span>';
+            
+            // Set date picker default to today
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const dateInput = document.getElementById('datePicker');
+            if(dateInput && !dateInput.value) {
+                dateInput.value = `${y}-${m}-${d}`;
+            }
+        }
+
+        function renderStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const list = document.getElementById('studentList');
+
+            if (allStudents.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ti ti-users-group" style="font-size: 3rem; color: var(--text-light);"></i>
+                        <p>아직 등록된 학생이 없습니다</p>
+                        <p style="font-size: 0.85rem; color: var(--text-gray);">학생이 앱에 로그인하면 자동으로 등록됩니다</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (currentFilter === 'all') {
+                let sortedStudents = [...allStudents].map(s => {
+                    const recs = studentRecordings[s.id] || [];
+                    const lastRec = recs.length > 0 ? recs.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0] : null;
+                    return { ...s, lastRecTime: lastRec ? new Date(lastRec.created_at).getTime() : 0, recs };
+                }).sort((a, b) => {
+                    if (a.lastRecTime !== b.lastRecTime) return b.lastRecTime - a.lastRecTime;
+                    return a.name.localeCompare(b.name, 'ko');
+                });
+
+                if(searchTerm) {
+                    sortedStudents = sortedStudents.filter(s => s.name.toLowerCase().includes(searchTerm));
+                }
+
+                if (sortedStudents.length === 0) {
+                     list.innerHTML = `<div class="empty-state">검색 결과가 없습니다</div>`;
+                     return;
+                }
+
+                list.innerHTML = sortedStudents.map(student => {
+                    const hasRecording = student.recs.length > 0;
+                    const lastDate = student.lastRecTime > 0
+                        ? new Date(student.lastRecTime).toLocaleDateString('ko-KR', {
+                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })
+                        : '-';
+                    const initial = student.name.charAt(0);
+
+                    return `
+                        <div class="student-card" onclick="viewStudentRecordings('${student.id}', '${student.name}')" style="margin-bottom: 12px;">
+                            <div class="student-avatar">${initial}</div>
+                            <div class="student-info">
+                                <div class="student-name">${student.name}</div>
+                                <div class="student-meta">${student.grade || ''} · 녹화 ${student.recs.length}개</div>
+                            </div>
+                            <div class="student-status">
+                                <span class="recording-badge ${hasRecording ? 'has-recording' : 'no-recording'}">
+                                    <i class="ti ti-${hasRecording ? 'video' : 'video-off'}"></i>
+                                    ${hasRecording ? '녹화 있음' : '녹화 없음'}
+                                </span>
+                                <span class="last-activity">${lastDate}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                // View by Date mode
+                const selectedDateStr = document.getElementById('datePicker').value; // YYYY-MM-DD
+                
+                let allRecs = [];
+                for (const student of allStudents) {
+                    const recs = studentRecordings[student.id] || [];
+                    for(const r of recs) {
+                        const recTime = new Date(r.created_at || 0);
+                        const ry = recTime.getFullYear();
+                        const rm = String(recTime.getMonth() + 1).padStart(2, '0');
+                        const rd = String(recTime.getDate()).padStart(2, '0');
+                        const recDateStr = `${ry}-${rm}-${rd}`;
+                        
+                        if (!selectedDateStr || recDateStr === selectedDateStr) {
+                            allRecs.push({
+                                student: student,
+                                recording: r,
+                                time: recTime
+                            });
+                        }
+                    }
+                }
+
+                if(allRecs.length === 0) {
+                     list.innerHTML = `
+                     <div class="empty-state">
+                        <i class="ti ti-calendar-off" style="font-size: 3rem; color: var(--text-light);"></i>
+                        <p>해당 날짜에 녹화 기록이 없습니다</p>
+                     </div>`;
+                     return;
+                }
+
+                // Sort recordings descending by time
+                allRecs.sort((a, b) => b.time - a.time);
+                
+                list.innerHTML = allRecs.map(item => {
+                    const timeStr = item.time.toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
+                    const recName = item.recording.name.split('/')[1] || item.recording.name;
+                    return `
+                    <div class="student-card" onclick="viewStudentRecordings('${item.student.id}', '${item.student.name}')" style="margin-bottom: 12px; border: 1px solid var(--border); box-shadow: none;">
+                        <div class="student-info">
+                            <div class="student-name" style="font-weight:700;">${item.student.name} <span class="text-light" style="font-size:0.8rem; font-weight:normal; margin-left: 8px;">${item.student.grade || ''}</span></div>
+                            <div class="student-meta" style="color: var(--primary); font-weight: 500; margin-top: 4px;">${timeStr} · ${recName.replace('.webm','')}</div>
+                        </div>
+                        <div class="student-status">
+                            <span class="recording-badge has-recording" style="background: var(--bg-light); color: var(--text-dark);">
+                                확인 <i class="ti ti-chevron-right" style="margin-left:2px;"></i>
+                            </span>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function filterStudents() {
+            renderStudents();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.filter === filter);
+            });
+            
+            document.getElementById('datePickerContainer').style.display = filter === 'date' ? 'block' : 'none';
+            document.getElementById('searchBoxContainer').style.display = filter === 'all' ? 'block' : 'none';
+            
+            renderStudents();
+        }
+
+        function viewStudentRecordings(studentId, studentName) {
+            sessionStorage.setItem('viewingStudentId', studentId);
+            sessionStorage.setItem('viewingStudentName', studentName);
+            window.location.href = 'student-recordings.html';
+        }
+
+        function refreshData() {
+            document.getElementById('studentList').innerHTML = `
+                <div class="empty-state">
+                    <i class="ti ti-loader" style="font-size: 2rem; animation: spin 1s linear infinite;"></i>
+                    <p>새로고침 중...</p>
+                </div>
+            `;
+            loadDashboardData();
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../service-worker.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

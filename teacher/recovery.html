@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>녹화 복구 도구 - TES Speaking</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f8fafc;
+        }
+
+        .recovery-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .page-header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .page-header .back-link {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+
+        .status-banner {
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status-banner.scanning {
+            background: #EFF6FF;
+            color: #1D4ED8;
+            border: 1px solid #BFDBFE;
+        }
+
+        .status-banner.found {
+            background: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #FDE68A;
+        }
+
+        .status-banner.success {
+            background: #DCFCE7;
+            color: #166534;
+            border: 1px solid #BBF7D0;
+        }
+
+        .status-banner.empty {
+            background: #F0FDF4;
+            color: #15803D;
+            border: 1px solid #BBF7D0;
+        }
+
+        .orphan-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .orphan-header {
+            padding: 16px 20px;
+            background: #FFF7ED;
+            border-bottom: 1px solid #FED7AA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .orphan-header .folder-name {
+            font-weight: 600;
+            color: #9A3412;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .orphan-header .file-count {
+            font-size: 0.8rem;
+            color: #C2410C;
+            background: #FFEDD5;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
+        .orphan-files {
+            padding: 16px 20px;
+        }
+
+        .file-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .file-row:last-child {
+            border-bottom: none;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .file-parsed {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+
+        .file-parsed .detected-name {
+            color: #7C3AED;
+            font-weight: 600;
+        }
+
+        .assign-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-family: inherit;
+            min-width: 150px;
+            background: white;
+        }
+
+        .assign-select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(45, 149, 150, 0.1);
+        }
+
+        .action-bar {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        }
+
+        .btn-recover {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2D9596 0%, #40B4B4 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-recover:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-scan {
+            padding: 12px 24px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #E2E8F0;
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2D9596, #5EEAD4);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .log-area {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #1E293B;
+            color: #94A3B8;
+            border-radius: var(--radius-md);
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .log-area .log-success { color: #4ADE80; }
+        .log-area .log-error { color: #F87171; }
+        .log-area .log-info { color: #60A5FA; }
+    </style>
+</head>
+
+<body>
+    <div class="recovery-container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-link">←</a>
+            <div>
+                <h1>🔧 녹화 복구 도구</h1>
+                <p style="font-size: 0.85rem; color: var(--text-gray); margin-top: 4px;">
+                    잘못된 폴더에 저장된 녹화를 올바른 학생에게 연결합니다
+                </p>
+            </div>
+        </div>
+
+        <div id="statusBanner" class="status-banner scanning">
+            <i class="ti ti-loader" style="animation: spin 1s linear infinite;"></i>
+            스캔 중... Storage에서 고아 폴더를 찾고 있습니다
+        </div>
+
+        <div id="orphanList"></div>
+
+        <div id="actionBar" class="action-bar" style="display: none;">
+            <button class="btn-recover" id="recoverBtn" onclick="startRecovery()">
+                <i class="ti ti-arrows-transfer-down"></i> 선택한 녹화 복구하기
+            </button>
+        </div>
+
+        <div class="log-area" id="logArea"></div>
+    </div>
+
+    <script src="../js/supabase.js"></script>
+    <script>
+        let allStudents = [];
+        let orphanFolders = []; // { folderId, files: [{name, path, parsedName, date}] }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Auth check
+            const { data: session } = await getTeacherSession();
+            if (!session || !session.user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const academy = getCurrentAcademy();
+            if (!academy) {
+                window.location.href = 'academy-setup.html';
+                return;
+            }
+
+            await scanStorage();
+        });
+
+        async function scanStorage() {
+            const client = await getSupabase();
+            if (!client) return;
+
+            // 1. Get all students from DB
+            const { data: students } = await getStudents();
+            allStudents = students || [];
+            const studentIds = new Set(allStudents.map(s => s.id));
+
+            console.log('📋 DB students:', allStudents.length, 'IDs:', [...studentIds]);
+
+            // 2. List all top-level folders in recordings bucket
+            const { data: folders, error } = await client.storage
+                .from('recordings')
+                .list('', { limit: 500 });
+
+            if (error) {
+                updateStatus('error', '❌ Storage 스캔 실패: ' + error.message);
+                return;
+            }
+
+            console.log('📂 All folders:', folders);
+
+            // 3. Find orphan folders (not matching any student UUID)
+            orphanFolders = [];
+
+            for (const folder of folders) {
+                // Skip files (only check folders)
+                if (folder.id !== null && folder.name.includes('.')) continue;
+
+                const folderId = folder.name;
+
+                // Check if this folder ID exists in students table
+                if (studentIds.has(folderId)) continue;
+
+                // It's an orphan! List its files
+                const { data: files } = await client.storage
+                    .from('recordings')
+                    .list(folderId, { limit: 100 });
+
+                if (!files || files.length === 0) continue;
+
+                const webmFiles = files.filter(f => f.name.endsWith('.webm'));
+                if (webmFiles.length === 0) continue;
+
+                const parsedFiles = webmFiles.map(f => {
+                    const parsed = parseFileName(f.name);
+                    return {
+                        name: f.name,
+                        path: `${folderId}/${f.name}`,
+                        created_at: f.created_at,
+                        ...parsed
+                    };
+                });
+
+                orphanFolders.push({
+                    folderId,
+                    files: parsedFiles,
+                    isNumericId: /^\d+$/.test(folderId)
+                });
+            }
+
+            console.log('🔍 Orphan folders found:', orphanFolders.length);
+
+            if (orphanFolders.length === 0) {
+                updateStatus('empty', '✅ 고아 녹화가 없습니다! 모든 녹화가 올바른 학생에게 연결되어 있습니다.');
+                document.getElementById('orphanList').innerHTML = '';
+            } else {
+                const totalFiles = orphanFolders.reduce((sum, f) => sum + f.files.length, 0);
+                updateStatus('found', `⚠️ ${orphanFolders.length}개의 고아 폴더에서 ${totalFiles}개의 녹화를 발견했습니다. 아래에서 올바른 학생을 선택해주세요.`);
+                renderOrphans();
+                document.getElementById('actionBar').style.display = 'flex';
+            }
+        }
+
+        function parseFileName(filename) {
+            // Format: EnglishName_Rec_20260327_1639.webm or EnglishName_U1_20260327_1639.webm
+            const name = filename.replace('.webm', '');
+            const parts = name.split('_');
+
+            let studentName = parts[0] || '알 수 없음';
+            let unitInfo = '';
+            let dateStr = '';
+
+            if (parts.length >= 4) {
+                // Name_Unit_Date_Time
+                unitInfo = parts[1];
+                dateStr = parts[2] + '_' + parts[3];
+            } else if (parts.length === 3) {
+                unitInfo = parts[1];
+                dateStr = parts[2];
+            }
+
+            // Format date for display
+            let displayDate = dateStr;
+            const dateMatch = dateStr.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})/);
+            if (dateMatch) {
+                displayDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]} ${dateMatch[4]}:${dateMatch[5]}`;
+            }
+
+            return { studentName, unitInfo, displayDate };
+        }
+
+        function renderOrphans() {
+            const container = document.getElementById('orphanList');
+
+            // Build student options HTML
+            const studentOptions = allStudents
+                .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+                .map(s => `<option value="${s.id}">${s.name} (${s.grade || '학년 미설정'})</option>`)
+                .join('');
+
+            let html = '';
+
+            for (const orphan of orphanFolders) {
+                const folderLabel = orphan.isNumericId
+                    ? `🔴 임시 ID: ${orphan.folderId}`
+                    : `🟡 미등록 ID: ${orphan.folderId.substring(0, 20)}...`;
+
+                html += `
+                <div class="orphan-card" data-folder="${orphan.folderId}">
+                    <div class="orphan-header">
+                        <span class="folder-name">${folderLabel}</span>
+                        <span class="file-count">${orphan.files.length}개 파일</span>
+                    </div>
+                    <div class="orphan-files">
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-dark);">
+                                이 폴더의 모든 녹화를 다음 학생에게 연결:
+                            </label>
+                            <select class="assign-select folder-assign" data-folder="${orphan.folderId}" 
+                                    style="width: 100%; margin-top: 6px; padding: 12px;">
+                                <option value="">-- 학생 선택 --</option>
+                                <option value="__new__">➕ 새 학생으로 등록</option>
+                                ${studentOptions}
+                            </select>
+                            <input type="text" class="new-student-name" data-folder="${orphan.folderId}" 
+                                   placeholder="새 학생 이름 입력" 
+                                   style="display:none; width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-family:inherit;">
+                        </div>
+                        ${orphan.files.map(f => `
+                        <div class="file-row">
+                            <i class="ti ti-video file-icon"></i>
+                            <div class="file-info">
+                                <div class="file-name">${f.name}</div>
+                                <div class="file-parsed">
+                                    감지된 이름: <span class="detected-name">${f.studentName}</span>
+                                    ${f.unitInfo ? ` · ${f.unitInfo}` : ''}
+                                    ${f.displayDate ? ` · ${f.displayDate}` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }
+
+            container.innerHTML = html;
+
+            // Add event listeners for "new student" option
+            document.querySelectorAll('.folder-assign').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const folder = e.target.dataset.folder;
+                    const nameInput = document.querySelector(`.new-student-name[data-folder="${folder}"]`);
+                    if (e.target.value === '__new__') {
+                        nameInput.style.display = 'block';
+                        // Pre-fill with detected name from first file
+                        const orphan = orphanFolders.find(o => o.folderId === folder);
+                        if (orphan && orphan.files.length > 0) {
+                            nameInput.value = orphan.files[0].studentName;
+                        }
+                    } else {
+                        nameInput.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        async function startRecovery() {
+            const client = await getSupabase();
+            if (!client) return;
+
+            const btn = document.getElementById('recoverBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ti ti-loader" style="animation: spin 1s linear infinite;"></i> 복구 중...';
+
+            const logArea = document.getElementById('logArea');
+            logArea.style.display = 'block';
+            logArea.innerHTML = '';
+
+            let successCount = 0;
+            let errorCount = 0;
+            let skippedCount = 0;
+
+            for (const orphan of orphanFolders) {
+                const select = document.querySelector(`.folder-assign[data-folder="${orphan.folderId}"]`);
+                const selectedValue = select ? select.value : '';
+
+                if (!selectedValue) {
+                    addLog(`⏭️ 폴더 ${orphan.folderId} 건너뜀 (학생 미선택)`, 'info');
+                    skippedCount += orphan.files.length;
+                    continue;
+                }
+
+                let targetStudentId = selectedValue;
+
+                // Create new student if needed
+                if (selectedValue === '__new__') {
+                    const nameInput = document.querySelector(`.new-student-name[data-folder="${orphan.folderId}"]`);
+                    const newName = nameInput ? nameInput.value.trim() : '';
+
+                    if (!newName) {
+                        addLog(`❌ 폴더 ${orphan.folderId}: 새 학생 이름이 비어있습니다`, 'error');
+                        errorCount += orphan.files.length;
+                        continue;
+                    }
+
+                    addLog(`📝 새 학생 등록 중: ${newName}`, 'info');
+                    const { data: newStudent, error: createErr } = await createStudent(newName, null);
+
+                    if (createErr || !newStudent) {
+                        addLog(`❌ 학생 등록 실패: ${createErr}`, 'error');
+                        errorCount += orphan.files.length;
+                        continue;
+                    }
+
+                    targetStudentId = newStudent.id;
+                    addLog(`✅ 학생 등록 완료: ${newName} (${targetStudentId})`, 'success');
+                    
+                    // Add to allStudents for reference
+                    allStudents.push(newStudent);
+                }
+
+                const targetStudent = allStudents.find(s => s.id === targetStudentId);
+                const targetName = targetStudent ? targetStudent.name : targetStudentId;
+
+                // Move each file: download → upload to new path → delete old
+                for (const file of orphan.files) {
+                    try {
+                        addLog(`📥 다운로드 중: ${file.name}`, 'info');
+
+                        // Download file
+                        const { data: blob, error: dlError } = await client.storage
+                            .from('recordings')
+                            .download(file.path);
+
+                        if (dlError) {
+                            addLog(`❌ 다운로드 실패: ${file.name} - ${dlError.message}`, 'error');
+                            errorCount++;
+                            continue;
+                        }
+
+                        // Upload to correct student folder
+                        const newPath = `${targetStudentId}/${file.name}`;
+                        addLog(`📤 업로드 중: ${newPath}`, 'info');
+
+                        const { error: upError } = await client.storage
+                            .from('recordings')
+                            .upload(newPath, blob, {
+                                contentType: 'video/webm',
+                                upsert: true
+                            });
+
+                        if (upError) {
+                            addLog(`❌ 업로드 실패: ${newPath} - ${upError.message}`, 'error');
+                            errorCount++;
+                            continue;
+                        }
+
+                        // Delete old file
+                        const { error: delError } = await client.storage
+                            .from('recordings')
+                            .remove([file.path]);
+
+                        if (delError) {
+                            addLog(`⚠️ 원본 삭제 실패 (파일은 복사됨): ${file.path}`, 'error');
+                        }
+
+                        addLog(`✅ 완료: ${file.name} → ${targetName}`, 'success');
+                        successCount++;
+
+                    } catch (e) {
+                        addLog(`❌ 오류: ${file.name} - ${e.message}`, 'error');
+                        errorCount++;
+                    }
+                }
+            }
+
+            // Summary
+            addLog('', 'info');
+            addLog(`========= 복구 완료 =========`, 'info');
+            addLog(`✅ 성공: ${successCount}개`, 'success');
+            addLog(`❌ 실패: ${errorCount}개`, errorCount > 0 ? 'error' : 'info');
+            addLog(`⏭️ 건너뜀: ${skippedCount}개`, 'info');
+
+            updateStatus('success', `✅ 복구 완료! 성공: ${successCount}개, 실패: ${errorCount}개, 건너뜀: ${skippedCount}개`);
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ti ti-refresh"></i> 다시 스캔';
+            btn.onclick = () => location.reload();
+        }
+
+        function updateStatus(type, message) {
+            const banner = document.getElementById('statusBanner');
+            banner.className = `status-banner ${type}`;
+            banner.innerHTML = message;
+        }
+
+        function addLog(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const line = document.createElement('div');
+            line.className = `log-${type}`;
+            line.textContent = message;
+            logArea.appendChild(line);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+    </script>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+
+</html>
