@@ -11,183 +11,433 @@
     <link rel="apple-touch-icon" href="../favicon.png">
     <link rel="manifest" href="../manifest.json">
     <style>
+
+        body {
+            background: var(--bg-light);
+        }
+
+        .home-wrap {
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding-top: var(--safe-top);
+            padding-bottom: calc(75px + 36px + 36px + var(--safe-bottom));
+        }
+
+        /* ── 헤더 섹션 ── */
         .home-header {
+            background: var(--bg-white);
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            padding: 24px 36px 32px;
+        }
+
+        .home-topbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--sp-5) var(--sp-5) var(--sp-3);
+            margin-bottom: 32px;
         }
 
-        .home-greeting {
-            font-size: var(--text-sm);
-            color: var(--text-gray);
-            font-weight: 400;
-        }
-
-        .home-name {
-            font-size: var(--text-2xl);
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-top: 2px;
-        }
-
-        .home-avatar {
+        .icon-btn {
             width: 44px;
             height: 44px;
-            background: var(--primary-pale);
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary-dark);
-            font-size: var(--text-xl);
-            border: 2px solid var(--primary-light);
+            border-radius: var(--radius-md);
+            color: var(--text-dark);
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: var(--transition);
         }
 
-        /* Menu Section */
-        .menu-row {
+        .icon-btn:active {
+            background: var(--bg-gray);
+        }
+
+        .home-identity {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .home-avatar {
+            width: 56px;
+            height: 56px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-white);
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .home-app-title {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .home-greeting {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-top: 4px;
+        }
+
+        /* ── 메인 콘텐츠 ── */
+        .home-content {
+            padding: 36px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── 스탯 카드 ── */
+        .stats-card {
+            background: var(--bg-dark);
+            border-radius: 32px;
+            padding: 36px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stats-card::after {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 128px;
+            height: 128px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .stats-card-left {
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-card-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text-white);
+            line-height: 1;
+        }
+
+        .stats-card-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 8px;
+        }
+
+        .stats-card-right {
+            text-align: right;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-card-progress {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-white);
+            line-height: 1.3;
+        }
+
+        .stats-card-goal {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 4px;
+        }
+
+        /* ── 학습 계속하기 ── */
+        .continue-card {
+            background: rgba(210, 243, 240, 0.4);
+            border: 1px solid rgba(137, 198, 192, 0.3);
+            border-radius: 24px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-xs);
+        }
+
+        .continue-card:active {
+            transform: scale(0.99);
+            background: rgba(210, 243, 240, 0.6);
+        }
+
+        .continue-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-white);
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .continue-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .continue-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .continue-desc {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+
+        .continue-arrow {
+            color: var(--text-light);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        /* ── 메뉴 섹션 ── */
+        .menu-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-gray);
+            margin-bottom: -8px;
+        }
+
+        .menu-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: var(--sp-3);
+            gap: 16px;
         }
 
         .menu-card {
             background: var(--bg-white);
-            border-radius: var(--radius-lg);
-            padding: var(--sp-4) var(--sp-3);
+            border-radius: 24px;
+            padding: 20px 16px;
             text-align: center;
-            box-shadow: var(--shadow-xs);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             cursor: pointer;
             transition: var(--transition);
             text-decoration: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: var(--sp-2);
         }
 
         .menu-card:active {
-            transform: scale(0.96);
-            background: var(--bg-light);
+            transform: scale(0.97);
+            box-shadow: var(--shadow-xs);
         }
 
-        .menu-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
+        .menu-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: var(--text-2xl);
+            font-size: 26px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
         }
 
-        .menu-card-icon.teal  { background: var(--primary-pale);        color: var(--primary-dark); }
-        .menu-card-icon.orange { background: var(--accent-orange-pale);  color: var(--accent-orange); }
-        .menu-card-icon.yellow { background: var(--accent-yellow-pale);  color: #B45309; }
+        .menu-icon.teal   { background: var(--primary-pale);       color: var(--primary-dark); }
+        .menu-icon.orange { background: var(--accent-orange-pale); color: var(--accent-orange); }
+        .menu-icon.yellow { background: var(--accent-yellow-pale); color: #B45309; }
 
-        .menu-card-label {
-            font-size: var(--text-sm);
-            font-weight: 600;
+        .menu-icon.text-abc {
+            background: var(--primary-pale);
+            color: var(--primary-dark);
+            font-family: 'Pretendard', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .menu-label {
+            font-size: 16px;
+            font-weight: 700;
             color: var(--text-dark);
+            margin-bottom: 4px;
         }
 
-        .menu-card-sub {
-            font-size: var(--text-xs);
-            color: var(--text-gray);
+        .menu-sub {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* ── 플로팅 탭바 ── */
+        .bottom-nav-pill {
+            position: fixed;
+            bottom: calc(36px + var(--safe-bottom));
+            left: 36px;
+            right: 36px;
+            height: 75px;
+            background: var(--bg-white);
+            border-radius: 32px;
+            border: 1px solid #F3F4F6;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        .nav-pill-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 20px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 11px;
+            font-weight: 500;
+            transition: var(--transition);
+            min-width: 64px;
+        }
+
+        .nav-pill-item i {
+            font-size: 24px;
+        }
+
+        .nav-pill-item.active {
+            color: var(--text-dark);
+            font-weight: 700;
         }
     </style>
 </head>
 
 <body>
-    <div class="app-container">
-        <div class="page-content" style="padding-top: 0;">
+    <div class="home-wrap">
 
-            <!-- Header -->
-            <div class="home-header">
-                <div>
-                    <p class="home-greeting">안녕하세요 👋</p>
-                    <h1 class="home-name" id="studentName">학생</h1>
-                </div>
-                <a href="profile.html" class="home-avatar">
-                    <i class="ti ti-user"></i>
-                </a>
+        <!-- 헤더 섹션 -->
+        <div class="home-header">
+            <div class="home-topbar">
+                <button class="icon-btn"><i class="ti ti-menu-2"></i></button>
+                <button class="icon-btn" onclick="location.href='profile.html'">
+                    <i class="ti ti-settings"></i>
+                </button>
             </div>
-
-            <!-- Stats Banner -->
-            <div class="stats-banner" style="margin-bottom: var(--sp-4);">
-                <div>
-                    <div class="stats-banner-value" id="learnedCount">0</div>
-                    <div class="stats-banner-label">오늘 완료한 학습</div>
+            <div class="home-identity">
+                <div class="home-avatar">
+                    <i class="ti ti-user"></i>
                 </div>
-                <div class="stats-banner-right">
-                    <div class="stats-banner-goal">오늘의 목표</div>
-                    <div class="stats-banner-progress">
+                <div>
+                    <h1 class="home-app-title">TES ENGLISH APP</h1>
+                    <p class="home-greeting">안녕하세요, <span id="studentName">학생</span> 님 👋</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="home-content">
+
+            <!-- 스탯 카드 -->
+            <div class="stats-card">
+                <div class="stats-card-left">
+                    <div class="stats-card-value" id="learnedCount">0</div>
+                    <div class="stats-card-label">오늘 완료한 학습</div>
+                </div>
+                <div class="stats-card-right">
+                    <div class="stats-card-progress">
                         <span id="todayCompleted">0</span> / 5 유닛
                     </div>
+                    <div class="stats-card-goal">오늘의 목표</div>
                 </div>
             </div>
 
-            <!-- Quick Start -->
-            <div class="quick-start" onclick="location.href='class.html'" style="margin-bottom: var(--sp-5);">
-                <div class="quick-start-icon">
+            <!-- 학습 계속하기 -->
+            <div class="continue-card" onclick="location.href='class.html'">
+                <div class="continue-icon">
                     <i class="ti ti-player-play"></i>
                 </div>
-                <div class="quick-start-body">
-                    <div class="quick-start-title">학습 계속하기</div>
-                    <div class="quick-start-desc" id="lastLearningDesc">마지막 학습: -</div>
+                <div class="continue-body">
+                    <div class="continue-title">학습 계속하기</div>
+                    <div class="continue-desc" id="lastLearningDesc">마지막: 학습</div>
                 </div>
-                <div class="quick-start-arrow">
+                <div class="continue-arrow">
                     <i class="ti ti-chevron-right"></i>
                 </div>
             </div>
 
-            <!-- Menu -->
-            <p class="section-title">메뉴</p>
-            <div class="menu-row">
+            <!-- 메뉴 -->
+            <p class="menu-section-title">메뉴</p>
+            <div class="menu-grid">
                 <a href="class.html" class="menu-card">
-                    <div class="menu-card-icon teal">
-                        <i class="ti ti-books"></i>
-                    </div>
-                    <div class="menu-card-label">클래스</div>
-                    <div class="menu-card-sub">교과서 선택</div>
+                    <div class="menu-icon teal"><i class="ti ti-books"></i></div>
+                    <div class="menu-label">클래스</div>
+                    <div class="menu-sub">교과서 선택</div>
                 </a>
                 <a href="stats.html" class="menu-card">
-                    <div class="menu-card-icon orange">
-                        <i class="ti ti-chart-bar"></i>
-                    </div>
-                    <div class="menu-card-label">통계</div>
-                    <div class="menu-card-sub">성취도 확인</div>
+                    <div class="menu-icon orange"><i class="ti ti-chart-bar"></i></div>
+                    <div class="menu-label">통계</div>
+                    <div class="menu-sub">성취도 확인</div>
                 </a>
                 <a href="recordings.html" class="menu-card">
-                    <div class="menu-card-icon yellow">
-                        <i class="ti ti-video"></i>
-                    </div>
-                    <div class="menu-card-label">녹화</div>
-                    <div class="menu-card-sub">저장된 영상</div>
+                    <div class="menu-icon yellow"><i class="ti ti-video"></i></div>
+                    <div class="menu-label">녹화</div>
+                    <div class="menu-sub">저장된 영상</div>
+                </a>
+                <a href="https://voca-test-eight.vercel.app/" target="_blank" class="menu-card">
+                    <div class="menu-icon text-abc">Abc</div>
+                    <div class="menu-label">TES VOCA</div>
+                    <div class="menu-sub">보카 앱으로 바로가기</div>
+                </a>
+                <a href="https://tes-edu.github.io/Acid-Rain/" target="_blank" class="menu-card">
+                    <div class="menu-icon orange"><i class="ti ti-cloud-rain"></i></div>
+                    <div class="menu-label">산성비 게임</div>
+                    <div class="menu-sub">영어 단어 산성비</div>
+                </a>
+                <a href="#" class="menu-card">
+                    <div class="menu-icon yellow"><i class="ti ti-file-check"></i></div>
+                    <div class="menu-label">레벨테스트</div>
+                    <div class="menu-sub">현재 준비 중</div>
                 </a>
             </div>
-        </div>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="main.html" class="nav-item active">
-                <span class="nav-icon"><i class="ti ti-home"></i></span>
-                <span>홈</span>
-            </a>
-            <a href="class.html" class="nav-item">
-                <span class="nav-icon"><i class="ti ti-books"></i></span>
-                <span>클래스</span>
-            </a>
-            <a href="stats.html" class="nav-item">
-                <span class="nav-icon"><i class="ti ti-chart-bar"></i></span>
-                <span>통계</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <span class="nav-icon"><i class="ti ti-user"></i></span>
-                <span>프로필</span>
-            </a>
-        </nav>
+        </div>
     </div>
+
+    <!-- 플로팅 탭바 -->
+    <nav class="bottom-nav-pill">
+        <a href="main.html" class="nav-pill-item active">
+            <i class="ti ti-home"></i>
+            <span>홈</span>
+        </a>
+        <a href="class.html" class="nav-pill-item">
+            <i class="ti ti-books"></i>
+            <span>클래스</span>
+        </a>
+        <a href="stats.html" class="nav-pill-item">
+            <i class="ti ti-chart-bar"></i>
+            <span>통계</span>
+        </a>
+        <a href="profile.html" class="nav-pill-item">
+            <i class="ti ti-user"></i>
+            <span>프로필</span>
+        </a>
+    </nav>
 
     <script src="../js/supabase.js"></script>
     <script>
@@ -197,7 +447,7 @@
                 window.location.href = '../index.html';
                 return;
             }
-            document.getElementById('studentName').textContent = student.name + '님';
+            document.getElementById('studentName').textContent = student.name;
 
             const today = new Date().toISOString().split('T')[0];
             const completionKey = `completion_${student.name}_${today}`;

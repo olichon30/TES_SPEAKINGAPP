@@ -46,8 +46,10 @@ if (SpeechRecognition) {
 
     recognition.onend = () => {
         console.log('Speech recognition ended');
+        isRecognizing = false;
     };
 }
+let isRecognizing = false;
 
 // Start speech recognition
 function startSpeechRecognition(target, callback) {
@@ -68,9 +70,15 @@ function startSpeechRecognition(target, callback) {
     recognitionCallback = callback;
 
     try {
+        // Stop any existing session first
+        if (isRecognizing) {
+            recognition.abort();
+        }
+        isRecognizing = true;
         recognition.start();
     } catch (e) {
         console.error('Failed to start recognition:', e);
+        isRecognizing = false;
     }
 }
 

@@ -259,13 +259,13 @@
                     });
                 }
 
-                // Script
+                // Script - English only, no numbering
                 const scriptContainer = document.getElementById('scriptContent');
-                if (data.script_en || data.script_kr) {
-                    scriptContainer.innerHTML = `
-                        <p style="font-size:1.1rem; font-weight:500; margin-bottom:8px;">${data.script_en || ''}</p>
-                        <p style="color:var(--text-gray); font-size:0.95rem;">${data.script_kr || ''}</p>
-                    `;
+                if (data.script_en) {
+                    const enLines = data.script_en.split('\n').filter(l => l.trim());
+                    scriptContainer.innerHTML = enLines.map(line => 
+                        `<p style="font-size:0.95rem; line-height:1.7; margin-bottom:4px;">${line}</p>`
+                    ).join('');
                 }
 
                 // Feedback
@@ -321,16 +321,18 @@
             }
 
             const scriptContainer = document.getElementById('scriptContent');
-            if (scriptEn || scriptKr) {
-                scriptContainer.innerHTML = `
-                    <p style="font-size:1.1rem; font-weight:500; margin-bottom:8px;">${scriptEn || ''}</p>
-                    <p style="color:var(--text-gray); font-size:0.95rem;">${scriptKr || ''}</p>
-                `;
+            if (scriptEn) {
+                const enLines = scriptEn.split('\n').filter(l => l.trim());
+                scriptContainer.innerHTML = enLines.map(line => 
+                    `<p style="font-size:0.95rem; line-height:1.7; margin-bottom:4px;">${line}</p>`
+                ).join('');
             } else if (scriptRaw) {
                 try {
                     const parsed = JSON.parse(scriptRaw);
                     if (Array.isArray(parsed)) {
-                        scriptContainer.innerHTML = parsed.map(s => `<p>${s.en}</p><p style="color:gray; font-size:0.9em">${s.kr}</p>`).join('');
+                        scriptContainer.innerHTML = parsed.map(s => 
+                            `<p style="font-size:0.95rem; line-height:1.7; margin-bottom:4px;">${s.en || ''}</p>`
+                        ).join('');
                     } else {
                         scriptContainer.textContent = scriptRaw;
                     }

@@ -111,7 +111,7 @@
 
         .file-row {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             padding: 12px 0;
             border-bottom: 1px solid #f1f5f9;
@@ -119,6 +119,42 @@
 
         .file-row:last-child {
             border-bottom: none;
+        }
+
+        .file-preview {
+            width: 140px;
+            min-width: 140px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .file-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-preview .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            transition: opacity 0.2s;
+        }
+
+        .file-preview .play-overlay i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .file-preview:hover .play-overlay {
+            opacity: 0;
         }
 
         .file-icon {
@@ -190,6 +226,23 @@
         .btn-recover:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        .btn-delete-file {
+            padding: 6px 10px;
+            background: #FEE2E2;
+            color: #DC2626;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-delete-file:hover {
+            background: #FECACA;
         }
 
         .btn-scan {
@@ -428,19 +481,29 @@
                                    placeholder="새 학생 이름 입력" 
                                    style="display:none; width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-md); font-family:inherit;">
                         </div>
-                        ${orphan.files.map(f => `
-                        <div class="file-row">
-                            <i class="ti ti-video file-icon"></i>
+                        ${orphan.files.map(f => {
+                            const videoUrl = getFilePublicUrl(f.path);
+                            return `
+                        <div class="file-row" id="file-${f.path.replace(/[\W]/g, '_')}">
+                            <div class="file-preview" onclick="togglePreview(this)">
+                                <video preload="metadata" muted>
+                                    <source src="${videoUrl}" type="video/webm">
+                                </video>
+                                <div class="play-overlay"><i class="ti ti-player-play"></i></div>
+                            </div>
                             <div class="file-info">
                                 <div class="file-name">${f.name}</div>
                                 <div class="file-parsed">
                                     감지된 이름: <span class="detected-name">${f.studentName}</span>
-                                    ${f.unitInfo ? ` · ${f.unitInfo}` : ''}
-                                    ${f.displayDate ? ` · ${f.displayDate}` : ''}
+                                    ${f.unitInfo ? ' · ' + f.unitInfo : ''}
+                                    ${f.displayDate ? ' · ' + f.displayDate : ''}
                                 </div>
                             </div>
-                        </div>
-                        `).join('')}
+                            <button class="btn-delete-file" onclick="deleteFile('${f.path}', this)">
+                                <i class="ti ti-trash"></i> 삭제
+                            </button>
+                        </div>`;
+                        }).join('')}
                     </div>
                 </div>
                 `;
@@ -604,6 +667,62 @@
             line.textContent = message;
             logArea.appendChild(line);
             logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function deleteFile(path, btnEl) {
+            if (!confirm('이 녹화를 영구 삭제하시겠습니까?')) return;
+
+            btnEl.disabled = true;
+            btnEl.innerHTML = '<i class="ti ti-loader" style="animation: spin 1s linear infinite;"></i>';
+
+            try {
+                const client = await getSupabase();
+                const { error } = await client.storage.from('recordings').remove([path]);
+
+                if (error) {
+                    alert('삭제 실패: ' + error.message);
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = '<i class="ti ti-trash"></i> 삭제';
+                    return;
+                }
+
+                // Remove from UI
+                const rowId = 'file-' + path.replace(/[\W]/g, '_');
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.style.opacity = '0.3';
+                    row.style.pointerEvents = 'none';
+                    setTimeout(() => row.remove(), 300);
+                }
+
+                // Update orphanFolders data
+                for (const orphan of orphanFolders) {
+                    orphan.files = orphan.files.filter(f => f.path !== path);
+                }
+
+            } catch (e) {
+                alert('삭제 오류: ' + e.message);
+                btnEl.disabled = false;
+                btnEl.innerHTML = '<i class="ti ti-trash"></i> 삭제';
+            }
+        }
+
+        function getFilePublicUrl(path) {
+            return `${SUPABASE_URL}/storage/v1/object/public/recordings/${path}`;
+        }
+
+        function togglePreview(el) {
+            const video = el.querySelector('video');
+            const overlay = el.querySelector('.play-overlay');
+            if (video.paused) {
+                video.play();
+                overlay.style.display = 'none';
+                video.controls = true;
+            } else {
+                video.pause();
+                overlay.style.display = 'flex';
+                video.controls = false;
+            }
         }
     </script>
 

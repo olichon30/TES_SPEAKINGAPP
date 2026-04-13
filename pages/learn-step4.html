@@ -205,8 +205,9 @@
                     });
 
                     isRecording = true;
-                    btn.style.backgroundColor = 'var(--accent-coral)';
-                    btn.style.borderColor = 'var(--accent-coral)';
+                    btn.style.backgroundColor = '#EF4444';
+                    btn.style.borderColor = '#EF4444';
+                    btn.style.color = 'white';
                     btn.innerHTML = '<i class="ti ti-player-stop" style="font-size: 1.5rem;"></i> <span>녹화 중지</span>';
                     timer.classList.remove('hidden');
                     hint.textContent = '녹화 중... 버튼을 눌러 중지';
@@ -220,6 +221,7 @@
                 isRecording = false;
                 btn.style.backgroundColor = '';
                 btn.style.borderColor = '';
+                btn.style.color = '';
                 btn.innerHTML = '<i class="ti ti-video" style="font-size: 1.5rem;"></i> <span>녹화 시작</span>';
                 timer.classList.add('hidden');
                 hint.textContent = '녹화 완료!';
@@ -252,9 +254,12 @@
             const btn = document.getElementById('recordBtn');
             btn.style.backgroundColor = '';
             btn.style.borderColor = '';
+            btn.style.color = '';
             btn.innerHTML = '<i class="ti ti-video" style="font-size: 1.5rem;"></i> <span>녹화 시작</span>';
 
             await initCamera();
+            const vid = document.getElementById('cameraPreview');
+            if (vid.srcObject) vid.play().catch(() => {});
         }
 
         async function saveAndComplete() {
@@ -288,6 +293,39 @@
                     hideLoading();
                     showToast('저장 실패: ' + error.message, 'error');
                     return;
+                }
+
+                // Save script metadata alongside recording
+                try {
+                    const sentences = JSON.parse(sessionStorage.getItem('currentSentences') || '[]');
+                    const textbook = JSON.parse(sessionStorage.getItem('currentTextbook') || '{}');
+                    const unitData = JSON.parse(sessionStorage.getItem('currentUnit') || '{}');
+
+                    if (sentences.length > 0 && videoUrl) {
+                        const client = await getSupabase();
+                        // Extract the filename from videoUrl to create matching JSON name
+                        const urlParts = videoUrl.split('/');
+                        const videoFileName = urlParts[urlParts.length - 1];
+                        const jsonFileName = videoFileName.replace('.webm', '.json');
+                        const jsonPath = `${studentId}/${jsonFileName}`;
+
+                        const metadata = {
+                            textbook: textbook.name || '',
+                            unit: unitData.name || unitTitle,
+                            sentences: sentences,
+                            recordedAt: new Date().toISOString()
+                        };
+
+                        await client.storage
+                            .from('recordings')
+                            .upload(jsonPath, new Blob([JSON.stringify(metadata)], { type: 'application/json' }), {
+                                contentType: 'application/json',
+                                upsert: true
+                            });
+                        console.log('📝 Script metadata saved:', jsonPath);
+                    }
+                } catch (metaErr) {
+                    console.warn('Script metadata save failed (non-critical):', metaErr);
                 }
 
                 if (videoUrl) {

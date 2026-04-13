@@ -255,6 +255,9 @@
             }
         }
 
+        // Cache for loaded script metadata
+        const scriptCache = {};
+
         async function renderRecordings() {
             const list = document.getElementById('recordingList');
             const client = await getSupabase();
@@ -279,6 +282,30 @@
                 const unitMatch = rec.name.match(/_U(\d+)_/);
                 const unitNum = unitMatch ? `Unit ${unitMatch[1]}` : '녹화';
 
+                // Try loading companion script JSON
+                let scriptHtml = '<p style="color: var(--text-gray); font-style: italic;">스크립트 정보 없음</p>';
+                try {
+                    const jsonName = rec.name.replace('.webm', '.json');
+                    const jsonPath = `${studentId}/${jsonName}`;
+                    const { data: jsonBlob, error: jsonErr } = await client.storage
+                        .from('recordings')
+                        .download(jsonPath);
+                    
+                    if (!jsonErr && jsonBlob) {
+                        const meta = JSON.parse(await jsonBlob.text());
+                        scriptCache[rec.name] = meta;
+
+                        if (meta.sentences && meta.sentences.length > 0) {
+                            const label = [meta.textbook, meta.unit].filter(Boolean).join(' · ');
+                            scriptHtml = (label ? `<p style="font-size:0.8rem; color:var(--primary); font-weight:600; margin-bottom:8px;">${label}</p>` : '') +
+                                meta.sentences.map(s => 
+                                    `<p style="font-size:0.95rem; margin-bottom:4px;">${s.en || ''}</p>` +
+                                    (s.kr ? `<p style="font-size:0.85rem; color:var(--text-gray); margin-bottom:10px;">${s.kr}</p>` : '')
+                                ).join('');
+                        }
+                    }
+                } catch (e) { /* no script file - that's OK */ }
+
                 html += `
                     <div class="recording-item">
                         <video class="recording-video" controls preload="metadata">
@@ -288,16 +315,12 @@
                             <div class="recording-title">${unitNum}</div>
                             <div class="recording-date">${date}</div>
                             
-                            <div class="script-section" id="script-${rec.name.replace(/\W/g, '')}">
+                            <div class="script-section">
                                 <div class="script-header">
                                     <span class="script-title">📝 학습 스크립트</span>
-                                    <div class="lang-toggle">
-                                        <button class="lang-btn active" onclick="toggleLang(this, 'en')">영어</button>
-                                        <button class="lang-btn" onclick="toggleLang(this, 'kr')">한국어</button>
-                                    </div>
                                 </div>
                                 <div class="script-content">
-                                    <p style="color: var(--text-gray); font-style: italic;">스크립트 정보 없음</p>
+                                    ${scriptHtml}
                                 </div>
                             </div>
 
@@ -378,20 +401,12 @@
                 const { data: urlData } = client.storage.from('recordings').getPublicUrl(path);
                 const publicUrl = urlData.publicUrl;
 
-                // Fetch script if available
+                // Fetch script from cached metadata
                 let scriptEn = '', scriptKr = '';
-                if (rec.problem_id) {
-                    try {
-                        const { data: prob } = await client
-                            .from('problems')
-                            .select('sentence_en, sentence_kr')
-                            .eq('id', rec.problem_id)
-                            .single();
-                        if (prob) {
-                            scriptEn = prob.sentence_en;
-                            scriptKr = prob.sentence_kr;
-                        }
-                    } catch (e) { console.warn('Script fetch failed', e); }
+                const meta = scriptCache[rec.name];
+                if (meta && meta.sentences && meta.sentences.length > 0) {
+                    scriptEn = meta.sentences.map(s => s.en || '').join('\n');
+                    scriptKr = meta.sentences.map(s => s.kr || '').join('\n');
                 }
 
                 // Generate 7-char short code
